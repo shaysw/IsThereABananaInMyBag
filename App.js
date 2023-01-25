@@ -1,20 +1,116 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
+import { AsyncStorage, Animated } from 'react-native';
+import { useEffect, useState } from "react";
+import { IsThereABananaInMyBagText } from "./IsThereABananaInMyBagText.js"
+import { styles } from "./styles.js"
+import { SvgXml } from "react-native-svg";
+// import { ShoppingBagComponent } from "./ShoppingBagComponent.js"
+import Toast from 'react-native-toast-message';
+import ShoppingBagComponent from './ShoppingBagComponent.js';
+import BananaComponent from './BananaComponent.js';
+
 
 export default function App() {
+  const [isThereABananaInMyBag, setIsThereABananaInMyBag] = useState(false);
+
+  const [activated, setActivated] = useState(false)
+  const [lowerAnimation, setLowerAnimation] = useState(new Animated.Value(250))
+
+  const startAnimation = () => {
+    setActivated(!activated)
+    Animated.timing(lowerAnimation, {
+      toValue: activated ? 250 : -250,
+      duration: 500,
+      useNativeDriver: true
+    }).start()
+  }
+  const animatedStyles = {
+    lower: {
+      transform: [
+        {
+          translateY: lowerAnimation
+        }
+      ]
+    }
+  }
+  useEffect(() => {
+    if (launched) {
+      return;
+    }
+    else {
+      loadIsThereABananaInMyBag()
+      launched = true;
+    }
+  }, []);
+
+  useEffect(() => {
+    Toast.show({
+      type: 'success',
+      text1: `isThereABananaInMyBag - Has changed to : ${isThereABananaInMyBag}`
+    })
+    console.log(isThereABananaInMyBag, '- Has changed')
+  }, [isThereABananaInMyBag])
+
+  function changeBananaStatus() {
+    saveIsThereABananaInMyBag(!isThereABananaInMyBag)
+    setIsThereABananaInMyBag(!isThereABananaInMyBag)
+    startAnimation()
+  }
+
+  async function loadIsThereABananaInMyBag() {
+    try {
+      AsyncStorage.getItem('isThereABananaInMyBag').then((response) => {
+        Toast.show({
+          type: 'success',
+          text1: `loadIsThereABananaInMyBag setting state to : ${response === 'true'}`
+        })
+        setIsThereABananaInMyBag(response === 'true')
+      }
+      )
+    } catch (error) {
+      console.log('Error getting')
+    }
+  }
+
+  async function saveIsThereABananaInMyBag(value) {
+    try {
+      await AsyncStorage.setItem(
+        'isThereABananaInMyBag',
+        value.toString(),
+      );
+      console.log(`222:/t${value}`);
+    } catch (error) {
+      console.log('Error setting')
+    }
+  }
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
+    <View style={styles.baseContainer} onTouchStart={changeBananaStatus}>
+      <View style={styles.topContainer}>
+        <Text style={[
+          styles.text,
+          {
+            marginTop: 38
+          }]}>Is there a banana in my bag?</Text>
+      </View>
+      <Animated.View style={[ styles.image, styles.banana, animatedStyles.lower]}>
+        <BananaComponent />
+      </Animated.View>
+      <ShoppingBagComponent style={styles.image} />
+      <View style={styles.bottomContainer}>
+        <IsThereABananaInMyBagText text={isThereABananaInMyBag} />
+      </View>
+      <Toast />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+
+
+
+let launched = false;
+
+// const svgMarkup = `<svg height="100" width="100">
+// <circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" /></svg>`
+// const svgMarkup = `<svg height="100" width="100"  ><path d="M352 160v-32C352 57.42 294.579 0 224 0 153.42 0 96 57.42 96 128v32H0v272c0 44.183 35.817 80 80 80h288c44.183 0 80-35.817 80-80V160h-96zm-192-32c0-35.29 28.71-64 64-64s64 28.71 64 64v32H160v-32zm160 120c-13.255 0-24-10.745-24-24s10.745-24 24-24 24 10.745 24 24-10.745 24-24 24zm-192 0c-13.255 0-24-10.745-24-24s10.745-24 24-24 24 10.745 24 24-10.745 24-24 24z"/></svg>`
+
