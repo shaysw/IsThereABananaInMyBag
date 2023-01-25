@@ -18,8 +18,8 @@ export const styles = StyleSheet.create({
     },
     text: {
         color: '#33b5e5',
-        fontFamily: 'Roboto:wght@500',
-        fontSize: 48,
+        fontFamily: 'Roboto-Medium',
+        fontSize: 42,
         textAlign: 'center',
         marginLeft: 12,
         marginRight: 12
@@ -29,5 +29,11 @@ export const styles = StyleSheet.create({
     },
     banana: {
         position: "absolute",
+    },
+    time: {
+        fontSize: 30,
+        color: "#fff",
+        marginBottom: 30,
+        textAlign: "center",
     }
 });

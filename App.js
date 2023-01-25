@@ -3,27 +3,22 @@ import { AsyncStorage, Animated } from 'react-native';
 import { useEffect, useState } from "react";
 import { IsThereABananaInMyBagText } from "./IsThereABananaInMyBagText.js"
 import { styles } from "./styles.js"
-import { SvgXml } from "react-native-svg";
-// import { ShoppingBagComponent } from "./ShoppingBagComponent.js"
 import Toast from 'react-native-toast-message';
 import ShoppingBagComponent from './ShoppingBagComponent.js';
 import BananaComponent from './BananaComponent.js';
+import { useFonts } from 'expo-font';
+import BackgroundTimer from "react-native-background-timer"
 
 
 export default function App() {
   const [isThereABananaInMyBag, setIsThereABananaInMyBag] = useState(false);
+  const [fontsLoaded, error] = useFonts({
+    'Roboto-Medium': require('./assets/fonts/Roboto-Medium.ttf')
+  });
 
-  const [activated, setActivated] = useState(false)
-  const [lowerAnimation, setLowerAnimation] = useState(new Animated.Value(250))
+  const [secondsLeft, setSecondsLeft] = useState(3601);
 
-  const startAnimation = () => {
-    setActivated(!activated)
-    Animated.timing(lowerAnimation, {
-      toValue: activated ? 250 : -250,
-      duration: 500,
-      useNativeDriver: true
-    }).start()
-  }
+  const [lowerAnimation, setLowerAnimation] = useState(new Animated.Value(-250))
   const animatedStyles = {
     lower: {
       transform: [
@@ -33,13 +28,21 @@ export default function App() {
       ]
     }
   }
+  const startAnimation = () => {
+    // setActivated(!isThereABananaInMyBag)
+    Animated.timing(lowerAnimation, {
+      toValue: isThereABananaInMyBag ? -250 : 230,
+      duration: 500,
+      useNativeDriver: true
+    }).start()
+  }
+
   useEffect(() => {
     if (launched) {
       return;
     }
     else {
       loadIsThereABananaInMyBag()
-      launched = true;
     }
   }, []);
 
@@ -47,13 +50,39 @@ export default function App() {
     Toast.show({
       type: 'success',
       text1: `isThereABananaInMyBag - Has changed to : ${isThereABananaInMyBag}`
+
     })
     console.log(isThereABananaInMyBag, '- Has changed')
+    if (isThereABananaInMyBag) {
+      startTimer()
+    }
+    else {
+      BackgroundTimer.stopBackgroundTimer();
+    }
+    return () => {
+      BackgroundTimer.stopBackgroundTimer();
+    };
   }, [isThereABananaInMyBag])
 
+  // Checks if secondsLeft = 0 and stop timer if so
+  useEffect(() => {
+    if (secondsLeft === 0) BackgroundTimer.stopBackgroundTimer()
+  }, [secondsLeft])
+
+  const startTimer = () => {
+    BackgroundTimer.runBackgroundTimer(() => {
+      setSecondsLeft(secs => {
+        if (secs > 0) return secs - 1
+        else return 0
+      })
+    }, 1000)
+  }
+
   function changeBananaStatus() {
-    saveIsThereABananaInMyBag(!isThereABananaInMyBag)
-    setIsThereABananaInMyBag(!isThereABananaInMyBag)
+    var newValue = !isThereABananaInMyBag
+    saveIsThereABananaInMyBag(newValue)
+    setIsThereABananaInMyBag(newValue)
+
     startAnimation()
   }
 
@@ -65,6 +94,10 @@ export default function App() {
           text1: `loadIsThereABananaInMyBag setting state to : ${response === 'true'}`
         })
         setIsThereABananaInMyBag(response === 'true')
+        if (!launched) {
+          setLowerAnimation(new Animated.Value(response === 'true' ? 230 : -250))
+          launched = true;
+        }
       }
       )
     } catch (error) {
@@ -93,12 +126,15 @@ export default function App() {
             marginTop: 38
           }]}>Is there a banana in my bag?</Text>
       </View>
-      <Animated.View style={[ styles.image, styles.banana, animatedStyles.lower]}>
+      <Animated.View style={[styles.image, styles.banana, animatedStyles.lower]}>
         <BananaComponent />
       </Animated.View>
       <ShoppingBagComponent style={styles.image} />
       <View style={styles.bottomContainer}>
         <IsThereABananaInMyBagText text={isThereABananaInMyBag} />
+      </View>
+      <View style={styles.container}>
+        <Text style={styles.time}>secondsLeft</Text>
       </View>
       <Toast />
     </View>
