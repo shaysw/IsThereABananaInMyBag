@@ -2,7 +2,19 @@
   "expo": {
     "slug": "isthereabananainmybag",
     "name": "isthereabananainmybag",
-    "sdkVersion": "47.0.0"
+    "sdkVersion": "47.0.0",
+    "version": "3.1",
+    "icon": "./launcher_icon.png",
+    "extra": {
+      "eas": {
+        "projectId": "7693bbf4-35a2-43a3-8540-e2499c039fa7"
+      }
+    },
+    "android": {
+      "package": "com.shaycorp.isthereabananainmybag",
+      "versionCode": 4,
+      "icon": "./launcher_icon.png"
+    }
   },
   "name": "isthereabananainmybag"
 }

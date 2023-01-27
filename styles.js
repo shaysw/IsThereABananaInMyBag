@@ -9,16 +9,17 @@ export const styles = StyleSheet.create({
         alignItems: 'center'
     },
     topContainer: {
-        backgroundColor: '#0099cc',
+        backgroundColor: '#00000000',
         textAlignVertical: 'top'
     },
     bottomContainer: {
-        backgroundColor: '#0099cc',
+        backgroundColor: '#00000000',
         textAlignVertical: 'bottom',
     },
     text: {
-        color: '#33b5e5',
-        fontFamily: 'Roboto-Medium',
+        color: '#000000',
+        fontFamily: 'Roboto',
+        fontWeight: '700',
         fontSize: 42,
         textAlign: 'center',
         marginLeft: 12,
